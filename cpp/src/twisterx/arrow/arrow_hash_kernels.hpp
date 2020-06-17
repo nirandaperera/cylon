@@ -27,6 +27,7 @@
 #include "iostream"
 #include <unordered_set>
 #include <chrono>
+#include <list>
 
 namespace twisterx {
 
@@ -238,6 +239,60 @@ class ArrowArrayIdxHashJoinKernel {
     auto t2 = std::chrono::high_resolution_clock::now();
     LOG(INFO) << "probe_phase " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
         .count();
+  }
+
+  int IdxHashJoinOuter(const std::shared_ptr<arrow::Array> &left_idx_col,
+                       const std::shared_ptr<arrow::Array> &right_idx_col,
+                       std::shared_ptr<std::vector<std::list<int64_t>*>> &left_table_indices) {
+
+    left_table_indices->resize(left_idx_col->length(), NULLPTR);
+    MMAP_TYPE mmapleft;
+    auto reader0 = std::static_pointer_cast<ARROW_ARRAY_TYPE>(left_idx_col);
+    for (uint64_t i = 0; i < reader0->length(); i++) {
+      auto lValue = reader0->Value(i);
+      auto val = (CTYPE) lValue;
+      mmapleft.insert(std::make_pair(val, i));
+    }
+
+    auto reader1 = std::static_pointer_cast<ARROW_ARRAY_TYPE>(right_idx_col);
+    for (uint64_t i = 0; i < reader1->length(); i++) {
+      auto lValue = reader1->Value(i);
+      auto val = (CTYPE) lValue;
+      const auto range = mmapleft.equal_range(val);
+      for (auto it = range.first; it != range.second; it++) {
+        if (left_table_indices[it->second] == NULL)
+          left_table_indices[it->second] = new std::list<uint64_t>(); // make sure to de-allocate memory ...
+        left_table_indices[it->second].push_back(i);
+      }
+    }
+  }
+
+  Table generateJoinTable(std::vector<std::list<uint64_t>* > &left_table_indices, Table t1, Table t2) {
+    Table out;
+    std::vector<bool> rightSelected(t2.num_row(), false);
+    for(int i=0; i < left_table_indices.size(); ++i) {
+      Row rLeft = t1.get(i);
+      if (left_table_indices[i] != NULL) {
+        for(auto it = left_table_indices[i]->begin(); it != left_table_indices[i]->end(); ++it) {
+          uint64_t rightTabRowId = (*it);
+          Row rRight = t2.get(rightTabRowId);
+          out.insert(combine(rLeft, rRight));
+          rightSelected[rightTabRowId] = true;
+        }
+
+        delete left_table_indices[i];
+      } else
+        out.insert(combine(rLeft, NULL));
+    }
+
+    for(int i=0; i < rightSelected.size(); ++i) {
+      if (!rightSelected[i]) {
+        Row rowRight = t2.get(i);
+        out.insert(combine(NULL, rowRight))
+      }
+    }
+
+    return out;
   }
 };
 }
