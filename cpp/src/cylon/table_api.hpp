@@ -171,9 +171,9 @@ Status HashPartition(CylonContext *ctx,
 Status Select(CylonContext *ctx,
               const std::string &id,
               const std::function<bool(cylon::Row)> &selector,
-              const std::string &out);
+              const std::string &dest_id);
 
-Status Project(const std::string &id, const std::vector<int64_t> &project_columns, const std::string &out);
+Status Project(const std::string &id, const std::vector<int64_t>& project_columns, const std::string &dest_id);
 
 Status Reduce(const std::string &id, const std::vector<int64_t> &aggregate_columns,
               const std::vector<aggregate::Operator> &operators, const std::string &output);
