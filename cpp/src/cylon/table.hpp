@@ -30,6 +30,7 @@
 #include "join/join.hpp"
 #include "io/csv_write_config.hpp"
 #include "row.hpp"
+#include "aggregate.hpp"
 
 namespace cylon {
 
@@ -197,6 +198,9 @@ class Table {
    * @return
    */
   Status Select(const std::function<bool(cylon::Row)> &selector, std::shared_ptr<Table> &output);
+
+  Status Reduce(const std::vector<int64_t> &project_columns, const std::vector<aggregate::Operator> &operators,
+                std::shared_ptr<Table> &output);
 
   /**
    * Creates a simpler view of an existing table by dropping one or more columns

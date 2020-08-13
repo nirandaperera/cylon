@@ -24,6 +24,7 @@
 #include "io/csv_write_config.hpp"
 #include "ctx/cylon_context.hpp"
 #include "row.hpp"
+#include "aggregate.hpp"
 
 /**
  * This file shouldn't have an arrow dependency. Use the table_api_extended to define
@@ -172,6 +173,10 @@ Status Select(CylonContext *ctx,
               const std::function<bool(cylon::Row)> &selector,
               const std::string &out);
 
-Status Project(const std::string &id, const std::vector<int64_t>& project_columns, const std::string &out);
+Status Project(const std::string &id, const std::vector<int64_t> &project_columns, const std::string &out);
+
+Status Reduce(const std::string &id, const std::vector<int64_t> &aggregate_columns,
+              const std::vector<aggregate::Operator> &operators, const std::string &output);
+
 }  // namespace cylon
 #endif //CYLON_SRC_IO_TABLE_API_H_

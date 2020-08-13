@@ -65,6 +65,12 @@ if (NOT HAVE_EXCLUSIVE_SCAN)
     add_definitions(-DNEED_EXCLUSIVE_SCAN)
 endif ()
 
+#include(CheckCXXCompilerFlag)
+#CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_OPT_ARCH_NATIVE_SUPPORTED)
+#if (COMPILER_OPT_ARCH_NATIVE_SUPPORTED)
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+#endif()
+
 # Put the libaries and binaries that get built into directories at the
 # top of the build.
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
