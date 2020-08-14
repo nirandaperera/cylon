@@ -24,7 +24,7 @@
 #include "io/csv_write_config.hpp"
 #include "ctx/cylon_context.hpp"
 #include "row.hpp"
-#include "aggregate.hpp"
+#include "aggregate/aggregate.hpp"
 
 /**
  * This file shouldn't have an arrow dependency. Use the table_api_extended to define

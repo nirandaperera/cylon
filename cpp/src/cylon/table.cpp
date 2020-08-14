@@ -471,6 +471,24 @@ Status Table::Select(const std::function<bool(cylon::Row)> &selector, shared_ptr
   return Status::OK();
 }
 
+Status Table::Reduce(const std::vector<int64_t> &columns, const std::vector<aggregate::Operator> &operators,
+                     std::shared_ptr<Table> &output) {
+
+  if (this->Columns() < columns.size() || columns.size() != operators.size()){
+    return Status(Invalid, "Mismatch in columns and/or operators provided for reduction");
+  }
+
+  std::shared_ptr<arrow::Table> out_table;
+  arrow::Status status =
+      cylon::aggregate::Reduce(this->table_, columns, operators, out_table, cylon::ToArrowPool(this->ctx));
+
+  if (!status.ok()) {
+    output = std::make_shared<cylon::Table>(out_table, this->ctx);
+    return Status(UnknownError, status.message());
+  }
+  return Status::OK();
+}
+
 Status Table::Union(std::shared_ptr<Table> &first, std::shared_ptr<Table> &second,
                     std::shared_ptr<Table> &out) {
   shared_ptr<arrow::Table> ltab = first->get_table();

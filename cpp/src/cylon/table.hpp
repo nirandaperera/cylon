@@ -30,7 +30,7 @@
 #include "join/join.hpp"
 #include "io/csv_write_config.hpp"
 #include "row.hpp"
-#include "aggregate.hpp"
+#include "aggregate/aggregate.hpp"
 
 namespace cylon {
 
@@ -205,7 +205,7 @@ class Table {
    */
   Status Select(const std::function<bool(cylon::Row)> &selector, std::shared_ptr<Table> &output);
 
-  Status Reduce(const std::vector<int64_t> &project_columns, const std::vector<aggregate::Operator> &operators,
+  Status Reduce(const std::vector<int64_t> &columns, const std::vector<aggregate::Operator> &operators,
                 std::shared_ptr<Table> &output);
 
   /**
