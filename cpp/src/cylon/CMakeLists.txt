@@ -148,6 +148,15 @@ add_library(cylon SHARED
         indexing/index_utils.cpp
         indexing/indexer.hpp
         indexing/indexer.cpp
+        dist/api.hpp
+        dist/comms/comm.hpp
+        dist/ctx/context.hpp
+        dist/status.hpp
+        dist/ops/unary_ops.hpp
+        dist/ops/binary_ops.hpp
+        dist/ops/n_ary_ops.hpp
+        dist/properties/table_properties.hpp
+        dist/properties/array_properties.hpp
         )
 
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")

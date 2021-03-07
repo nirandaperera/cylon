@@ -51,4 +51,5 @@ endmacro(cylon_add_exe2)
 cylon_add_exe2(ops com_comm_test)
 cylon_add_exe2(ops join_op_example)
 
+cylon_add_exe2(api api_example)
 
