@@ -19,7 +19,7 @@ import pandas as pd
 import pycylon as cn
 import pyarrow as pa
 from pycylon import Series
-from pycylon.frame import DataFrame
+from pycylon.frame import DataFrame, CylonEnv
 from pycylon import Table
 from pycylon.io import CSVReadOptions
 from pycylon.io import read_csv
@@ -373,6 +373,7 @@ def test_applymap():
     assert (pdf.applymap(lambda x: len(str(x))).values.tolist() == cdf.applymap(
         lambda x: len(str(x))).to_pandas().values.tolist())
 
+
 def test_data_frame():
     df = {'col-0': [1, 2, 3], 'col-1': [4, 5, 6]}
     cdf = DataFrame(df)
@@ -430,4 +431,27 @@ def test_select_dtypes():
     assert cdf.select_dtypes(exclude=['int64', 'object']).values.tolist() == pdf.select_dtypes(exclude=['int64', 'object']).values.tolist()
     assert len(cdf.select_dtypes(include='bool').values.tolist()) == 0
 
-    
+
+def test_groupby():
+    env: CylonEnv = CylonEnv(config=None, distributed=False)
+
+    df = {'col0': [1, 2, 3, 4, 1, 2], 'col1': [4, 5, 6, 5, 7, 8]}
+    cdf = DataFrame(df)
+    pdf = pd.DataFrame(df)
+
+    pgby = pdf.groupby(by='col0').agg({'col1': ['sum', 'count']}).reset_index()
+
+    def check_cylon_gby(kwargs, ops):
+        cgby = cdf.groupby(**kwargs).agg(ops).to_pandas()
+        assert cgby.values.tolist() == pgby.values.tolist()
+
+    # indices
+    check_cylon_gby({'by': 0, 'env': env}, {1: ['sum', 'count']})
+    # col names
+    check_cylon_gby({'by': 'col0', 'env': env}, {'col1': ['sum', 'count']})
+
+    # indices - mapred
+    check_cylon_gby({'by': 0, 'env': env, 'groupby_type': 'mapred_hash'}, {1: ['sum', 'count']})
+    # col names - mapred
+    check_cylon_gby({'by': 'col0', 'env': env, 'groupby_type': 'mapred_hash'},
+                    {'col1': ['sum', 'count']})

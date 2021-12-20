@@ -28,6 +28,7 @@ cpdef enum AggregationOp:
 AggregationOpString = {
     'sum': CGroupByAggregationOp.CSUM,
     'cnt': CGroupByAggregationOp.CCOUNT,
+    'count': CGroupByAggregationOp.CCOUNT,
     'min': CGroupByAggregationOp.CMIN,
     'max': CGroupByAggregationOp.CMAX,
     'var': CGroupByAggregationOp.CVAR,
